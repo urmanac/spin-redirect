@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: "Install Go"
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.17'
+
+      - name: "Install TinyGo"
+        run: |
+          wget https://github.com/tinygo-org/tinygo/releases/download/v0.25.0/tinygo_0.25.0_amd64.deb
+          sudo dpkg -i tinygo_0.25.0_amd64.deb
+
+      - name: Make
+        env:
+          ENABLE_WASM_OPT: false
+        run: make build
