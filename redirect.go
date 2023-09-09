@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -39,7 +40,7 @@ func NewSpinRedirect() SpinRedirect {
 
 func (s SpinRedirect) handleFunc(w http.ResponseWriter, r *http.Request) {
 	dest := s.getDestination()
-	code := s.getStatusCode()
+	code := s.getStatusCode(r.Method)
 
 	w.Header().Set("Location", dest)
 	w.WriteHeader(code)
@@ -54,11 +55,37 @@ func (s SpinRedirect) getDestination() string {
 // getStatusCode returns the HTTP status code
 // If no status code is found, or if the provided value is invalid,
 // DefaultStatusCode is returned.
-func (s SpinRedirect) getStatusCode() int {
+func (s SpinRedirect) getStatusCode(method string) int {
 	str := s.cfg.Get(statusCodeKey)
 	code, err := strconv.Atoi(str)
 	if err != nil {
 		return DefaultStatusCode
 	}
+	if !isValidRedirectStatusCode(code, method) {
+		fmt.Printf("Invalid status code provided: %d. Will use %d instead.\n", code, DefaultStatusCode)
+		return DefaultStatusCode
+	}
+
 	return code
+}
+
+// isValidRedirectStatusCode returns true if the provided status code is valid for redirection
+func isValidRedirectStatusCode(code int, method string) bool {
+	if code == http.StatusSeeOther &&
+		(method == http.MethodPut || method == http.MethodPost) {
+		return true
+	}
+	validCodes := []int{
+		http.StatusMovedPermanently,
+		http.StatusFound,
+		http.StatusTemporaryRedirect,
+		http.StatusPermanentRedirect,
+	}
+
+	for _, c := range validCodes {
+		if c == code {
+			return true
+		}
+	}
+	return false
 }
