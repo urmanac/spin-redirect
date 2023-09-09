@@ -18,7 +18,7 @@ The following table outlines available configuration values:
 | `destination` | Where should the component redirect to                | *(empty string)* |
 | `statuscode`  | What HTTP status code should be used when redirecting | `302`            |
 
-The `spin-redirect` component tries to lookup the config value in the Spin component configuration using the keys shown in the table above (lower case). If desired key is not present, it tries transforms the key to upper case (e.g., `DESTINATION`) and checks environment variables.
+The `spin-redirect` component tries to look up the config value in the Spin component configuration using the keys shown in the table above (lower case). If desired key is not present, it transforms the key to upper case (e.g., `DESTINATION`) and checks environment variables.
 
 ## Example usage
 
