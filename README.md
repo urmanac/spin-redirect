@@ -15,10 +15,20 @@ The following table outlines available configuration values:
 
 | Key           | Description                                           | Default Value    |
 |---------------|-------------------------------------------------------|------------------|
-| `destination` | Where should the component redirect to                | *(empty string)* |
+| `destination` | Where should the component redirect to                | `/`              |
 | `statuscode`  | What HTTP status code should be used when redirecting | `302`            |
 
 The `spin-redirect` component tries to look up the config value in the Spin component configuration using the keys shown in the table above (lower case). If desired key is not present, it transforms the key to upper case (e.g., `DESTINATION`) and checks environment variables.
+
+### Valid redirection status codes
+
+The `spin-redirect` component supports the following HTTP status codes to perform a redirect:
+
+- `301` Moved Permanently
+- `302` Found (Moved Temporarily)
+- `303` See Other: Only supported for `PUT` and `POST` requests
+- `307` Temporary Redirect
+- `308` Permanent Redirect
 
 ## Example usage
 
@@ -54,9 +64,11 @@ version = "0.1.0"
 [[component]]
 id = "redirect-sample"
 source = "path/to/redirect.wasm"
+
 [component.config]
 destination="/index.html"
 statuscode="301"
+
 [component.trigger]
 route = "/"
 
