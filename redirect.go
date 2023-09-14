@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,6 +10,8 @@ import (
 const (
 	// Default value for HTTP status code
 	DefaultStatusCode int = http.StatusFound
+	// Default value for redirection target
+	DefaultRedirectionTarget string = "/"
 	// Key for loading desired destination
 	destinationKey string = "destination"
 	// Key for loading desired HTTP status code
@@ -39,34 +40,36 @@ func NewSpinRedirect() SpinRedirect {
 }
 
 func (s SpinRedirect) handleFunc(w http.ResponseWriter, r *http.Request) {
-	dest := s.getDestination()
-	code := s.getStatusCode(r.Method)
+	dest, _ := s.getDestination()
+	code, _ := s.getStatusCode(r.Method)
 
 	w.Header().Set("Location", dest)
 	w.WriteHeader(code)
 }
 
-// getDestination returns the destination URL
-// If no destination is found, an empty string is returned.
-func (s SpinRedirect) getDestination() string {
-	return s.cfg.Get(destinationKey)
+// getDestination returns the destination URL and a boolean indicating if the user provided a destination URL.
+// If no destination is found, DefaultRedirectionTarget (/) is returned.
+func (s SpinRedirect) getDestination() (string, bool) {
+	d := s.cfg.Get(destinationKey)
+	if len(d) == 0 {
+		return DefaultRedirectionTarget, false
+	}
+	return d, true
 }
 
 // getStatusCode returns the HTTP status code
 // If no status code is found, or if the provided value is invalid,
-// DefaultStatusCode is returned.
-func (s SpinRedirect) getStatusCode(method string) int {
+// DefaultStatusCode is returned along with a boolean indicating if the user provided a valid status code.
+func (s SpinRedirect) getStatusCode(method string) (int, bool) {
 	str := s.cfg.Get(statusCodeKey)
 	code, err := strconv.Atoi(str)
 	if err != nil {
-		return DefaultStatusCode
+		return DefaultStatusCode, false
 	}
 	if !isValidRedirectStatusCode(code, method) {
-		fmt.Printf("Invalid status code provided: %d. Will use %d instead.\n", code, DefaultStatusCode)
-		return DefaultStatusCode
+		return DefaultStatusCode, false
 	}
-
-	return code
+	return code, true
 }
 
 // isValidRedirectStatusCode returns true if the provided status code is valid for redirection
