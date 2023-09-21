@@ -2,10 +2,11 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
-	spinhttp "github.com/fermyon/spin/sdk/go/http"
+	spinhttp "github.com/fermyon/spin/sdk/go/v2/http"
 )
 
 const (
@@ -17,6 +18,8 @@ const (
 	destinationKey string = "destination"
 	// Key for loading desired HTTP status code
 	statusCodeKey string = "statuscode"
+	// Key to enable adding original path and query in redirect
+	includePathQueryParams = "include_path_query_params"
 )
 
 func init() {
@@ -44,7 +47,7 @@ func (s SpinRedirect) handleFunc(w http.ResponseWriter, r *http.Request) {
 	dest, _ := s.getDestination()
 	code, _ := s.getStatusCode(r.Method)
 
-	w.Header().Set("Location", dest)
+	w.Header().Set("Location", s.WithPathQueryParams(dest, r))
 	w.WriteHeader(code)
 }
 
