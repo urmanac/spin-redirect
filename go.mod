@@ -1,4 +1,4 @@
-module github.com/fermyon/finicky-whiskers/redirect
+module github.com/fermyon/spin-redirect
 
 go 1.17
 
