@@ -18,8 +18,8 @@ const (
 	destinationKey string = "destination"
 	// Key for loading desired HTTP status code
 	statusCodeKey string = "statuscode"
-	// Key to enable adding original path and query in redirect
-	includePathQueryParams = "include_path_query_params"
+	// Key to enable adding original path in redirect
+	includePath = "include_path"
 )
 
 func init() {
@@ -47,7 +47,7 @@ func (s SpinRedirect) handleFunc(w http.ResponseWriter, r *http.Request) {
 	dest, _ := s.getDestination()
 	code, _ := s.getStatusCode(r.Method)
 
-	w.Header().Set("Location", s.WithPathQueryParams(dest, r))
+	w.Header().Set("Location", s.WithPath(dest, r))
 	w.WriteHeader(code)
 }
 
@@ -61,8 +61,8 @@ func (s SpinRedirect) getDestination() (string, bool) {
 	return d, true
 }
 
-func (s SpinRedirect) WithPathQueryParams(dest string, r *http.Request) string {
-	d := s.cfg.Get(includePathQueryParams)
+func (s SpinRedirect) WithPath(dest string, r *http.Request) string {
+	d := s.cfg.Get(includePath)
 	if d != "true" {
 		return dest
 	}
