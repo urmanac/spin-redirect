@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	spinhttp "github.com/fermyon/spin/sdk/go/http"
 )
@@ -55,6 +56,26 @@ func (s SpinRedirect) getDestination() (string, bool) {
 		return DefaultRedirectionTarget, false
 	}
 	return d, true
+}
+
+func (s SpinRedirect) WithPathQueryParams(dest string, r *http.Request) string {
+	d := s.cfg.Get(includePathQueryParams)
+	if d != "true" {
+		return dest
+	}
+
+	u, err := url.Parse(dest)
+	if err != nil {
+		return dest
+	}
+
+	// Combine paths if request has a non-empty path
+	if r.URL.Path != "" && r.URL.Path != "/" {
+		// Ensure we don't double-slash when combining paths
+		u.Path = strings.TrimSuffix(u.Path, "/") + "/" + strings.TrimPrefix(r.URL.Path, "/")
+	}
+
+	return u.String()
 }
 
 // getStatusCode returns the HTTP status code
